@@ -13,48 +13,42 @@
 // limitations under the License.
 
 using BenchmarkDotNet.Attributes;
-using System;
 using Serilog.Capturing;
 using Serilog.Events;
-using Serilog.PerformanceTests.Support;
 
 namespace Serilog.PerformanceTests
 {
     /// <summary>
-    /// Tests the cost of writing through the logging pipeline.
+    /// Tests the cost of creating log events from a set of parameters.
     /// </summary>
     [MemoryDiagnoser]
-    public class PipelineBenchmark
+    public class BindingBenchmark
     {
         readonly ILogger _log;
-        readonly Exception _exception;
-        readonly PreparedMessageTemplate<string> _prepared;
+        readonly PreparedMessageTemplate<string, string, int> _prepared;
 
-        const string Template = "Hello, {Name}!";
+        const string Template = "Template with {One}, {Two} and {Three}";
 
-        public PipelineBenchmark()
+        public BindingBenchmark()
         { 
-            _exception = new Exception("An Error");
-            _log = new LoggerConfiguration()
-                .WriteTo.Sink(new NullSink())
-                .CreateLogger();
+            _log = new LoggerConfiguration().CreateLogger();
 
             // Ensure template is cached
-            _log.Information(_exception, Template, "World");
+            _log.Information(Template, "One", "Two", 3);
 
-            _prepared = new PreparedMessageTemplate<string>(Template);
+            _prepared = new PreparedMessageTemplate<string, string, int>(Template);
         }
 
         [Benchmark(Baseline = true)]
         public void EmitLogEvent()
         {
-            _log.Information(_exception, Template, "World");
+            _log.Information(Template, "One", "Two", 3);
         }
 
         [Benchmark]
         public void EmitPreparedLogEvent()
         {
-            _prepared.WriteEvent(_log, LogEventLevel.Information, _exception, "World");
+            _prepared.WriteEvent(_log, LogEventLevel.Information, "One", "Two", 3);
         }
     }
 }

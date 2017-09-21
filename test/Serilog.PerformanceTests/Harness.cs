@@ -45,7 +45,7 @@ namespace Serilog.PerformanceTests
         {
             BenchmarkRunner.Run<MessageTemplateParsingBenchmark>();
         }
-        
+
         [Fact]
         public void LevelControl()
         {
@@ -68,6 +68,12 @@ namespace Serilog.PerformanceTests
         public void Pipeline()
         {
             BenchmarkRunner.Run<PipelineBenchmark>();
+        }
+
+        [Fact]
+        public void Binding()
+        {
+            BenchmarkRunner.Run<BindingBenchmark>();
         }
 
         [Fact]
