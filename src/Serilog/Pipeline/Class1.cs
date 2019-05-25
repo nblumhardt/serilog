@@ -9,28 +9,6 @@
 //namespace Serilog.Pipeline
 //{
 
-//    struct EventData
-//    {
-//        public static readonly EventData Empty = default;
-
-//        public DateTimeOffset Timestamp { get; }
-//        public LogEventLevel Level { get; }
-//        public MessageTemplate MessageTemplate { get; }
-//        public ImmutableDictionary<string, LogEventPropertyValue> Properties { get; }
-//        public Exception Exception { get; }
-
-//        public EventData(DateTimeOffset timestamp, LogEventLevel level, Exception exception, MessageTemplate messageTemplate, ImmutableDictionary<string, LogEventPropertyValue> properties)
-//        {
-//            Timestamp = timestamp;
-//            Level = level;
-//            MessageTemplate = messageTemplate;
-//            Properties = properties;
-//            Exception = exception;
-//        }
-//    }
-
-
-
 //    sealed class Sink : Element
 //    {
 //        public override void Propagate(ref EventData eventData, Emitter next)
@@ -61,68 +39,6 @@
 //        }
 //    }
 
-//    struct EventDataBuilder
-//    {
-//        readonly ImmutableDictionary<string, LogEventPropertyValue>.Builder _properties;
-
-//        public DateTimeOffset Timestamp { get; }
-//        public LogEventLevel Level { get; }
-//        public MessageTemplate MessageTemplate { get; }
-//        public Exception Exception { get; }
-
-//        public IDictionary<string, LogEventPropertyValue> Properties => _properties;
-
-//        EventDataBuilder(DateTimeOffset timestamp, LogEventLevel level, Exception exception, MessageTemplate messageTemplate, ImmutableDictionary<string, LogEventPropertyValue>.Builder properties)
-//        {
-//            Timestamp = timestamp;
-//            Level = level;
-//            MessageTemplate = messageTemplate;
-//            _properties = properties;
-//            Exception = exception;
-//        }
-
-//        public static EventDataBuilder FromEventData(ref EventData eventData, int reservedAdditionalProperties)
-//        {
-//            return new EventDataBuilder(
-//                eventData.Timestamp,
-//                eventData.Level,
-//                eventData.Exception,
-//                eventData.MessageTemplate,
-//                eventData.Properties.ToBuilder());
-//        }
-
-//        public EventData ToEventData()
-//        {
-//            return new EventData(Timestamp, Level, Exception, MessageTemplate, _properties.ToImmutable());
-//        }
-//    }
-
-//    interface IEventDataEnricher
-//    {
-//        void Enrich(ref EventDataBuilder eventDataBuilder);
-//    }
-
-//    sealed class AggregateEnricher : Element
-//    {
-//        readonly IEventDataEnricher[] _enrichers;
-
-//        public AggregateEnricher(params IEventDataEnricher[] enrichers)
-//        {
-//            _enrichers = enrichers;
-//        }
-
-//        public override void Propagate(ref EventData eventData, Emitter next)
-//        {
-//            // Assume each enricher will add a property; 
-//            var builder = EventDataBuilder.FromEventData(ref eventData, _enrichers.Length);
-//            foreach (var enricher in _enrichers)
-//            {
-//                enricher.Enrich(ref builder);
-//            }
-//            var enriched = builder.ToEventData();
-//            next.Emit(ref enriched);
-//        }
-//    }
 
 
 //    class ScalarPropertyEnricher : IEventDataEnricher

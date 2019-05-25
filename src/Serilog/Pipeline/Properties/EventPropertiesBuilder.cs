@@ -7,7 +7,7 @@ namespace Serilog.Pipeline.Properties
     // These types use arrays rather than dictionaries because element counts are almost always small (ten or fewer)
     // and copying is frequent.
     // TODO, make methods inlinable by extracting throw statements; check _elements for null and fail gracefully.
-    struct EventPropertiesBuilder
+    struct EventPropertiesBuilder : IEnumerable<(string, LogEventPropertyValue)>
     {
         const int DefaultInitialCapacity = 4;
 
@@ -33,6 +33,20 @@ namespace Serilog.Pipeline.Properties
         public EventProperties ToImmutable()
         {
             return new EventProperties(_elements, _count);
+        }
+        
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        // Struct enumerator would help, here.
+        public IEnumerator<(string, LogEventPropertyValue)> GetEnumerator()
+        {
+            for (var i = 0; i < _count; ++i)
+            {
+                yield return _elements[i];
+            }
         }
 
         public int Count => _count;
