@@ -4,13 +4,13 @@ using Serilog.Pipeline.Properties;
 
 namespace Serilog.Pipeline.Event
 {
-    struct EventDataBuilder<TException>
+    struct EventDataBuilder
     {
         MessageTemplate _messageTemplate;
 
         public DateTimeOffset Timestamp { get; set; }
         public LogEventLevel Level { get; set; }
-        public TException Exception { get; set; }
+        public Exception Exception { get; set; }
         public EventPropertiesBuilder Properties { get; set; }
 
         public MessageTemplate MessageTemplate
@@ -19,7 +19,7 @@ namespace Serilog.Pipeline.Event
             set => _messageTemplate = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public EventDataBuilder(DateTimeOffset timestamp, LogEventLevel level, TException exception, MessageTemplate messageTemplate, EventPropertiesBuilder properties)
+        public EventDataBuilder(DateTimeOffset timestamp, LogEventLevel level, Exception exception, MessageTemplate messageTemplate, EventPropertiesBuilder properties)
         {
             _messageTemplate = messageTemplate ?? throw new ArgumentNullException(nameof(messageTemplate));
 
@@ -29,19 +29,9 @@ namespace Serilog.Pipeline.Event
             Exception = exception;
         }
 
-        public static EventDataBuilder<TException> FromEventData(in EventData<TException> eventData, int propertiesReservedCapacity)
+        public EventData ToImmutable()
         {
-            return new EventDataBuilder<TException>(
-                eventData.Timestamp,
-                eventData.Level,
-                eventData.Exception,
-                eventData.MessageTemplate,
-                eventData.Properties.ToBuilder(propertiesReservedCapacity));
-        }
-
-        public EventData<TException> ToEventData()
-        {
-            return new EventData<TException>(Timestamp, Level, Exception, MessageTemplate, Properties.ToImmutable());
+            return new EventData(Timestamp, Level, Exception, MessageTemplate, Properties.ToImmutable());
         }
     }
 }

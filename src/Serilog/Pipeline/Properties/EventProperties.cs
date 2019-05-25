@@ -8,9 +8,9 @@ namespace Serilog.Pipeline.Properties
     // and copying is frequent.
     // TODO, make methods inlinable by extracting throw statements; check _elements for null and fail gracefully.
 
-    struct EventProperties
+    readonly struct EventProperties
     {
-        (string, LogEventPropertyValue)[] _elements;
+        readonly (string, LogEventPropertyValue)[] _elements;
 
         public EventProperties((string, LogEventPropertyValue)[] elements, int count)
         {

@@ -1,4 +1,8 @@
 ﻿namespace Serilog.Pipeline.Elements
 {
-    delegate bool DataPredicate<T>(in T data) where T : struct;
+    abstract class DataPredicate<T>
+        where T: struct
+    {
+        public abstract bool IsMatch(in T data);
+    }
 }

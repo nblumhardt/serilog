@@ -2,19 +2,20 @@
 
 namespace Serilog.Pipeline.Elements
 {
-    sealed class Filter<T> : Element<T>
+    sealed class FilterElement<T, P> : Element<T>
         where T: struct
+        where P: DataPredicate<T>
     {
-        readonly DataPredicate<T> _condition;
+        readonly P _condition;
 
-        public Filter(DataPredicate<T> condition) 
+        public FilterElement(P condition) 
         {
             _condition = condition ?? throw new ArgumentNullException(nameof(condition));
         }
 
         public override void Propagate(in T data, Emitter<T> next)
         {
-            if (_condition(data))
+            if (_condition.IsMatch(data))
                 next.Emit(in data);
         }
     }

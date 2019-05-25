@@ -4,23 +4,35 @@ using Serilog.Pipeline.Properties;
 
 namespace Serilog.Pipeline.Event
 {
-    struct EventData<TException>
+    readonly struct EventData
     {
-        public static readonly EventData<TException> Empty = default;
+#pragma warning disable 414
+        public static readonly EventData Empty = default;
+#pragma warning restore 414
 
         public DateTimeOffset Timestamp { get; }
         public LogEventLevel Level { get; }
         public MessageTemplate MessageTemplate { get; }
         public EventProperties Properties { get; }
-        public TException Exception { get; }
+        public Exception Exception { get; }
 
-        public EventData(DateTimeOffset timestamp, LogEventLevel level, TException exception, MessageTemplate messageTemplate, EventProperties properties)
+        public EventData(DateTimeOffset timestamp, LogEventLevel level, Exception exception, MessageTemplate messageTemplate, EventProperties properties)
         {
             Timestamp = timestamp;
             Level = level;
-            MessageTemplate = messageTemplate;
+            MessageTemplate = messageTemplate ?? throw new ArgumentNullException(nameof(messageTemplate));
             Properties = properties;
             Exception = exception;
+        }
+
+        public EventDataBuilder ToBuilder(int propertiesReservedCapacity)
+        {
+            return new EventDataBuilder(
+                Timestamp,
+                Level,
+                Exception,
+                MessageTemplate,
+                Properties.ToBuilder(propertiesReservedCapacity));
         }
     }
 }

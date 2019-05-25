@@ -2,13 +2,13 @@
 
 namespace Serilog.Pipeline.Elements
 {
-    sealed class Tap<T, TEmitter> : Element<T>
+    sealed class TapElement<T, TEmitter> : Element<T>
         where T : struct
         where TEmitter : Emitter<T>
     {
         readonly TEmitter _emitter;
 
-        public Tap(TEmitter emitter)
+        public TapElement(TEmitter emitter)
         {
             _emitter = emitter ?? throw new ArgumentNullException(nameof(emitter));
         }

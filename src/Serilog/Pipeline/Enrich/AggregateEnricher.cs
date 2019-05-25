@@ -1,30 +1,33 @@
 ﻿using System;
 using System.Linq;
+using Serilog.Core;
 using Serilog.Pipeline.Elements;
 using Serilog.Pipeline.Event;
 
 namespace Serilog.Pipeline.Enrich
 {
-    sealed class AggregateEnricher<TException> : Element<EventData<TException>>
+    sealed class AggregateEnricher : Element<EventData>
     {
-        readonly Enricher<TException>[] _enrichers;
+        readonly ILogEventPropertyValueFactory _propertyValueFactory;
+        readonly Enricher[] _enrichers;
 
-        public AggregateEnricher(params Enricher<TException>[] enrichers)
+        public AggregateEnricher(Enricher[] enrichers, ILogEventPropertyValueFactory propertyValueFactory)
         {
+            _propertyValueFactory = propertyValueFactory;
             _enrichers = enrichers?.ToArray() ?? throw new ArgumentNullException(nameof(enrichers));
         }
 
-        public override void Propagate(in EventData<TException> eventData, Emitter<EventData<TException>> next)
+        public override void Propagate(in EventData eventData, Emitter<EventData> next)
         {
             // Assume each enricher will, on average, add a property; plus two for good measure...
 
-            var builder = EventDataBuilder<TException>.FromEventData(in eventData, _enrichers.Length + 2);
+            var builder = eventData.ToBuilder(_enrichers.Length + 2);
             foreach (var enricher in _enrichers)
             {
-                enricher.Enrich(ref builder);
+                enricher.Enrich(ref builder, _propertyValueFactory);
             }
 
-            var enriched = builder.ToEventData();
+            var enriched = builder.ToImmutable();
             next.Emit(in enriched);
         }
     }
