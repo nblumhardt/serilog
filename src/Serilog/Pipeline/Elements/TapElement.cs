@@ -15,7 +15,7 @@ namespace Serilog.Pipeline.Elements
         
         public override void Propagate(in T data, Emitter<T> next)
         {
-            // Generic TEmitter means this will often be a direct (non-virtual) call.
+            // Generic TEmitter means this should be a direct (non-virtual) call if TEmitter is sealed.
             _emitter.Emit(in data);
             next.Emit(in data);
         }
