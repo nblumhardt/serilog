@@ -13,7 +13,7 @@ namespace Serilog.Pipeline.Write
         // An inefficient default implementation that ensures all P2 sinks can still be used in code
         // that expects an `ILogEventSink`. Heavily-used enrichers will override this method and implement
         // it efficiently.
-        public void Emit(LogEvent logEvent)
+        public virtual void Emit(LogEvent logEvent)
         {
             if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
             var data = Adapt.ToEventData(logEvent);

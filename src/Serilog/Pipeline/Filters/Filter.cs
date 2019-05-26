@@ -8,7 +8,7 @@ namespace Serilog.Pipeline.Filters
 {
     abstract class Filter : DataPredicate<EventData>, ILogEventFilter
     {
-        public bool IsEnabled(LogEvent logEvent)
+        public virtual bool IsEnabled(LogEvent logEvent)
         {
             var data = Adapt.ToEventData(logEvent);
             return IsMatch(in data);
