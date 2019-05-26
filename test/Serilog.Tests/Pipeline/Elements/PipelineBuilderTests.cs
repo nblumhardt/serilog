@@ -11,11 +11,11 @@ namespace Serilog.Tests.Pipeline.Elements
         {
             var collector = new Collector<int>();
 
-            var pipeline = PipelineBuilder.Build(
-                new TransformElement<int>((in int n) => n + 2),
-                new TransformElement<int>((in int n) => n * 2),
-                new TapElement<int, Collector<int>>(collector)
-            );
+            var pipeline = new PipelineBuilder<int>()
+                .Add(new TransformElement<int>((in int n) => n + 2))
+                .Add(new TransformElement<int>((in int n) => n * 2))
+                .Tap(collector)
+                .Build();
 
             pipeline.Emit(5);
 
