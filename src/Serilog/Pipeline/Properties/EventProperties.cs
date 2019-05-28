@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Serilog.Events;
+using Serilog.Pipeline.Event;
 
 namespace Serilog.Pipeline.Properties
 {
@@ -10,9 +11,9 @@ namespace Serilog.Pipeline.Properties
 
     readonly struct EventProperties
     {
-        readonly (string, LogEventPropertyValue)[] _elements;
+        readonly EventProperty[] _elements;
 
-        public EventProperties((string, LogEventPropertyValue)[] elements, int count)
+        public EventProperties(EventProperty[] elements, int count)
         {
             if (elements == null) throw new ArgumentNullException(nameof(elements));
             if (elements.Length < count) throw new ArgumentOutOfRangeException(nameof(elements), "Too few elements provided.");
@@ -34,7 +35,7 @@ namespace Serilog.Pipeline.Properties
 
             for (var i = 0; i < _elements.Length; ++i)
             {
-                if (_elements[i].Item1 == name)
+                if (_elements[i].Name == name)
                     return true;
             }
 

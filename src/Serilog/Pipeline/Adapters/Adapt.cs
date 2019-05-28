@@ -9,18 +9,20 @@ namespace Serilog.Pipeline.Adapters
 {
     static class Adapt
     {
-        public static EventDataBuilder ToEventDataBuilder(LogEvent logEvent)
+        public static EventDataBuilder ToEventDataBuilder(LogEvent logEvent, int propertiesReservedCapacity)
         {
             if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
 
-            var properties = new EventPropertiesBuilder(logEvent.Properties.Select(kvp => (kvp.Key, kvp.Value)).ToArray(), 0);
+            var properties = new EventPropertiesBuilder(logEvent.Properties.Count + propertiesReservedCapacity);
+            foreach (var logEventProperty in logEvent.Properties)
+                properties.AddUnchecked(new EventProperty(logEventProperty.Key, logEventProperty.Value));
             return new EventDataBuilder(logEvent.Timestamp, logEvent.Level, logEvent.Exception, logEvent.MessageTemplate, properties);
         }
 
         public static EventData ToEventData(LogEvent logEvent)
         {
             if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
-            return ToEventDataBuilder(logEvent).ToImmutable();
+            return ToEventDataBuilder(logEvent, 0).ToImmutable();
         }
 
         public static LogEventPropertyValueFactory ToPropertyValueFactory(ILogEventPropertyFactory propertyFactory)

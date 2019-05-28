@@ -15,7 +15,7 @@ namespace Serilog.Pipeline.Enrich
         // it efficiently.
         public virtual void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
-            var builder = Adapt.ToEventDataBuilder(logEvent);
+            var builder = Adapt.ToEventDataBuilder(logEvent, 1);
             var propertyValueFactory = Adapt.ToPropertyValueFactory(propertyFactory);
 
             Enrich(ref builder, propertyValueFactory);

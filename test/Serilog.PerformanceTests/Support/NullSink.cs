@@ -1,11 +1,16 @@
-﻿using Serilog.Core;
-using Serilog.Events;
+﻿using Serilog.Events;
+using Serilog.Pipeline.Event;
+using Serilog.Pipeline.Write;
 
 namespace Serilog.PerformanceTests.Support
 {
-    class NullSink : ILogEventSink
+    class NullSink : Sink
     {
-        public void Emit(LogEvent logEvent)
+        public override void Emit(LogEvent logEvent)
+        {
+        }
+
+        public override void Emit(in EventData data)
         {
         }
     }

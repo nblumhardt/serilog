@@ -14,7 +14,14 @@
 
 using BenchmarkDotNet.Attributes;
 using System;
+using System.Linq;
+using Serilog.Capturing;
+using Serilog.Core;
+using Serilog.Events;
 using Serilog.PerformanceTests.Support;
+using Serilog.Pipeline.Elements;
+using Serilog.Pipeline.Event;
+using Serilog.Pipeline.Logger;
 
 namespace Serilog.PerformanceTests
 {
@@ -24,7 +31,8 @@ namespace Serilog.PerformanceTests
     [MemoryDiagnoser]
     public class PipelineBenchmark
     {
-        ILogger _log;
+        Logger _log;
+        LogPipeline _pipeline;
         Exception _exception;
 
         [GlobalSetup]
@@ -35,14 +43,36 @@ namespace Serilog.PerformanceTests
                 .WriteTo.Sink(new NullSink())
                 .CreateLogger();
 
-            // Ensure template is cached
+            var emitter = new PipelineBuilder<EventData>()
+                .Tap(new NullSink())
+                .Build();
+
+            var converter = new PropertyValueConverter(
+                10,
+                int.MaxValue,
+                int.MaxValue,
+                Enumerable.Empty<Type>(),
+                Enumerable.Empty<IDestructuringPolicy>(),
+                false);
+
+            var processor = new MessageTemplateProcessor(converter);
+
+            _pipeline = new LogPipeline(
+                emitter,
+                processor,
+                LogEventLevel.Information);
+        }
+
+        [Benchmark(Baseline = true)]
+        public void EmitLogEvent()
+        {
             _log.Information(_exception, "Hello, {Name}!", "World");
         }
 
         [Benchmark]
-        public void EmitLogEvent()
+        public void EmitPipelineEvent()
         {
-            _log.Information(_exception, "Hello, {Name}!", "World");
+            _pipeline.Information(_exception, "Hello, {Name}!", "World");
         }
     }
 }

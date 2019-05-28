@@ -61,10 +61,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.ValueTuple" Version="4.3.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Pipeline\Configuration\" />
   </ItemGroup>
 </Project>
