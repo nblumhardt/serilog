@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Serilog.Events;
-using Serilog.Pipeline.Event;
 
 namespace Serilog.Pipeline.Properties
 {

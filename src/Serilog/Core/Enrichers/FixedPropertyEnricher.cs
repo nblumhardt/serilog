@@ -14,10 +14,12 @@
 
 using System;
 using Serilog.Events;
+using Serilog.Pipeline.Enrich;
+using Serilog.Pipeline.Event;
 
 namespace Serilog.Core.Enrichers
 {
-    class FixedPropertyEnricher : ILogEventEnricher
+    class FixedPropertyEnricher : Enricher
     {
         readonly EventProperty _eventProperty;
 
@@ -27,7 +29,12 @@ namespace Serilog.Core.Enrichers
             _eventProperty = eventProperty;
         }
 
-        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+        public override void Enrich(ref EventDataBuilder eventDataBuilder, ILogEventPropertyValueFactory propertyFactory)
+        {
+            eventDataBuilder.Properties.TryAdd(in _eventProperty);
+        }
+
+        public override void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
             if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
             logEvent.AddPropertyIfAbsent(_eventProperty);

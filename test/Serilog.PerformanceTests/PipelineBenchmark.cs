@@ -17,9 +17,11 @@ using System;
 using System.Linq;
 using Serilog.Capturing;
 using Serilog.Core;
+using Serilog.Core.Enrichers;
 using Serilog.Events;
 using Serilog.PerformanceTests.Support;
 using Serilog.Pipeline.Elements;
+using Serilog.Pipeline.Enrich;
 using Serilog.Pipeline.Event;
 using Serilog.Pipeline.Logger;
 
@@ -31,9 +33,12 @@ namespace Serilog.PerformanceTests
     [MemoryDiagnoser]
     public class PipelineBenchmark
     {
-        Logger _log;
-        LogPipeline _pipeline;
         Exception _exception;
+
+        Logger _log;
+        ILogger _logEnriched;
+
+        LogPipeline _pipeline, _pipelineEnriched;
 
         [GlobalSetup]
         public void Setup()
@@ -42,6 +47,7 @@ namespace Serilog.PerformanceTests
             _log = new LoggerConfiguration()
                 .WriteTo.Sink(new NullSink())
                 .CreateLogger();
+            _logEnriched = _log.ForContext<PipelineBenchmark>().ForContext("RequestId", "12345");
 
             var emitter = new PipelineBuilder<EventData>()
                 .Tap(new NullSink())
@@ -61,6 +67,13 @@ namespace Serilog.PerformanceTests
                 emitter,
                 processor,
                 LogEventLevel.Information);
+
+            var enriched = PipelineBuilder<EventData>.Link(new SafeEnricher<FixedPropertyEnricher>(new FixedPropertyEnricher(new EventProperty("RequestId", new ScalarValue("12345"))), converter),
+                PipelineBuilder<EventData>.Link(new SafeEnricher<FixedPropertyEnricher>(new FixedPropertyEnricher(new EventProperty("SourceContext", new ScalarValue(typeof(PipelineBenchmark).FullName))), converter), emitter));
+            _pipelineEnriched = new LogPipeline(
+                enriched,
+                processor,
+                LogEventLevel.Information);
         }
 
         [Benchmark(Baseline = true)]
@@ -73,6 +86,18 @@ namespace Serilog.PerformanceTests
         public void EmitPipelineEvent()
         {
             _pipeline.Information(_exception, "Hello, {Name}!", "World");
+        }
+
+        [Benchmark]
+        public void EmitEnrichedLogEvent()
+        {
+            _logEnriched.Information(_exception, "Hello, {Name}!", "World");
+        }
+
+        [Benchmark]
+        public void EmitEnrichedPipelineEvent()
+        {
+            _pipelineEnriched.Information(_exception, "Hello, {Name}!", "World");
         }
     }
 }
