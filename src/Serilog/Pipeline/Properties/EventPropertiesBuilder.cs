@@ -9,7 +9,7 @@ namespace Serilog.Pipeline.Properties
     // TODO, make methods inlinable by extracting throw statements; check _elements for null and fail gracefully.
     struct EventPropertiesBuilder : IEnumerable<EventProperty>
     {
-        const int DefaultInitialCapacity = 4;
+        const int MinimumAdditionalCapacity = 4;
 
         EventProperty[] _elements;
         int _count;
@@ -25,14 +25,18 @@ namespace Serilog.Pipeline.Properties
         {
             if (initial == null) throw new ArgumentNullException(nameof(initial));
             if (reservedCapacity < 0) throw new ArgumentOutOfRangeException(nameof(reservedCapacity), "Reserved capacity must be non-negative.");
-            Array.Resize(ref initial, Math.Max(initial.Length + reservedCapacity, DefaultInitialCapacity));
-            _elements = initial ?? throw new ArgumentNullException(nameof(initial));
-            _count = initial.Length;
-        }
 
-        public EventProperties ToImmutable()
-        {
-            return new EventProperties(_elements, _count);
+            if (reservedCapacity == 0)
+            {
+                _elements = new EventProperty[initial.Length];
+                Array.Copy(initial, _elements, initial.Length);
+            }
+            else
+            {
+                _elements = initial;
+                Array.Resize(ref _elements, _elements.Length + reservedCapacity);
+            }
+            _count = initial.Length;
         }
         
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -108,7 +112,7 @@ namespace Serilog.Pipeline.Properties
             }
 
             if (_elements.Length == _count)
-                Array.Resize(ref _elements, Math.Max(DefaultInitialCapacity, _count * 2));
+                Array.Resize(ref _elements, Math.Max(MinimumAdditionalCapacity, _count * 2));
 
             _elements[_count] = property;
             _count += 1;
@@ -127,7 +131,7 @@ namespace Serilog.Pipeline.Properties
             }
 
             if (_elements.Length == _count)
-                Array.Resize(ref _elements, Math.Max(DefaultInitialCapacity, _count * 2));
+                Array.Resize(ref _elements, Math.Max(MinimumAdditionalCapacity, _count * 2));
 
             _elements[_count] = new EventProperty(name, value);
             _count += 1;
@@ -160,7 +164,7 @@ namespace Serilog.Pipeline.Properties
             }
 
             if (_elements.Length == _count)
-                Array.Resize(ref _elements, Math.Max(DefaultInitialCapacity, _count * 2));
+                Array.Resize(ref _elements, Math.Max(MinimumAdditionalCapacity, _count * 2));
 
             _elements[_count] = property;
             _count += 1;
@@ -193,6 +197,31 @@ namespace Serilog.Pipeline.Properties
             }
 
             return false;
+        }
+        
+        public EventProperties ToImmutable()
+        {
+            var copy = new EventProperty[_count];
+            Array.Copy(_elements, copy, _count);
+            return new EventProperties(copy, _count);
+        }
+
+        // This method is "dangerous" in that storage transfers in ownership without copying.
+        // It may be better to use an `EventProperties.FromElements()` method so that 
+        public static EventProperties IntoImmutable(ref EventPropertiesBuilder builder)
+        {
+            return new EventProperties(builder._elements, builder._count);
+        }
+
+        public static EventPropertiesBuilder FromElements(EventProperty[] elements, int reservedCapacity)
+        {
+            if (reservedCapacity != 0)
+                return new EventPropertiesBuilder(elements, reservedCapacity);
+
+            var ret = default(EventPropertiesBuilder);
+            ret._elements = elements ?? throw new ArgumentNullException(nameof(elements));
+            ret._count = elements.Length;
+            return ret;
         }
     }
 }

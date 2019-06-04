@@ -19,7 +19,7 @@ using Serilog.Parsing;
 
 namespace Serilog.Capturing
 {
-    class MessageTemplateProcessor : ILogEventPropertyFactory
+    class MessageTemplateProcessor : ILogEventPropertyFactory, ILogEventPropertyValueFactory
     {
         readonly MessageTemplateCache _parser = new MessageTemplateCache(new MessageTemplateParser());
         readonly PropertyBinder _propertyBinder;

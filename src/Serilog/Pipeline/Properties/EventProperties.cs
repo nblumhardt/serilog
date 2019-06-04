@@ -12,18 +12,15 @@ namespace Serilog.Pipeline.Properties
     {
         readonly EventProperty[] _elements;
 
+        // TODO - make this "safe"/copying, and move the non-copying behavior to FromElements
         public EventProperties(EventProperty[] elements, int count)
         {
             if (elements == null) throw new ArgumentNullException(nameof(elements));
             if (elements.Length < count) throw new ArgumentOutOfRangeException(nameof(elements), "Too few elements provided.");
             if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count), "Count must be non-negative.");
-            Array.Resize(ref elements, count);
+            if (count != elements.Length)
+                Array.Resize(ref elements, count);
             _elements = elements;
-        }
-
-        public EventPropertiesBuilder ToBuilder(int reservedCapacity)
-        {
-            return new EventPropertiesBuilder(_elements, reservedCapacity);
         }
 
         public int Count => _elements.Length;
@@ -68,6 +65,11 @@ namespace Serilog.Pipeline.Properties
 
                 return value;
             }
+        }
+        
+        public EventPropertiesBuilder ToBuilder(int reservedCapacity)
+        {
+            return new EventPropertiesBuilder(_elements, reservedCapacity);
         }
     }
 }

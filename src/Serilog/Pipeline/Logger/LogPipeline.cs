@@ -3,6 +3,7 @@ using Serilog.Capturing;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Pipeline.Elements;
+using Serilog.Pipeline.Enrich;
 using Serilog.Pipeline.Event;
 using Serilog.Pipeline.Properties;
 
@@ -12,6 +13,7 @@ namespace Serilog.Pipeline.Logger
     class LogPipeline
     {
         readonly Emitter<EventData> _emitter;
+        readonly Enricher _enricher;
         readonly MessageTemplateProcessor _messageTemplateProcessor;
         readonly LogEventLevel _minimumLevel;
         readonly Action _dispose;
@@ -24,7 +26,8 @@ namespace Serilog.Pipeline.Logger
             LogEventLevel minimumLevel,
             Action dispose = null,
             LoggingLevelSwitch levelSwitch = null,
-            LevelOverrideMap overrideMap = null)
+            LevelOverrideMap overrideMap = null,
+            Enricher enricher = null)
         {
             _emitter = emitter ?? throw new ArgumentNullException(nameof(emitter));
             _messageTemplateProcessor = messageTemplateProcessor ?? throw new ArgumentNullException(nameof(messageTemplateProcessor));
@@ -32,6 +35,7 @@ namespace Serilog.Pipeline.Logger
             _dispose = dispose;
             _levelSwitch = levelSwitch;
             _overrideMap = overrideMap;
+            _enricher = enricher ?? TerminatingEnricher.Instance;
         }
         
         /// <summary>
@@ -79,8 +83,8 @@ namespace Serilog.Pipeline.Logger
 
             _messageTemplateProcessor.Process(messageTemplate, new object[] {propertyValue}, out var parsedTemplate, out var boundProperties);
 
-            var data = new EventData(DateTimeOffset.Now, level, exception, parsedTemplate, new EventProperties(boundProperties, boundProperties.Length));
-            Dispatch(in data);
+            var data = new EventDataBuilder(DateTimeOffset.Now, level, exception, parsedTemplate, EventPropertiesBuilder.FromElements(boundProperties, _enricher.EstimatedCount));
+            Dispatch(ref data);
         }
 
         /// <summary>
@@ -103,23 +107,21 @@ namespace Serilog.Pipeline.Logger
 
             _messageTemplateProcessor.Process(messageTemplate, propertyValues, out var parsedTemplate, out var boundProperties);
 
-            var data = new EventData(DateTimeOffset.Now, level, exception, parsedTemplate, new EventProperties(boundProperties, boundProperties.Length));
-            Dispatch(in data);
+            var data = new EventDataBuilder(DateTimeOffset.Now, level, exception, parsedTemplate, EventPropertiesBuilder.FromElements(boundProperties, _enricher.EstimatedCount));
+            Dispatch(ref data);
         }
 
-        void Dispatch(in EventData data)
+        public LogPipeline ForContext<TEnricher>(TEnricher enricher)
+            where TEnricher: Enricher
         {
-            //// The enricher may be a "safe" aggregate one, but is most commonly bare and so
-            //// the exception handling from SafeAggregateEnricher is duplicated here.
-            //try
-            //{
-            //    _enricher.Enrich(logEvent, _messageTemplateProcessor);
-            //}
-            //catch (Exception ex)
-            //{
-            //    SelfLog.WriteLine("Exception {0} caught while enriching {1} with {2}.", ex, logEvent, _enricher);
-            //}
+            var chain = new ChainedEnricher<TEnricher>(enricher, _enricher);
+            return new LogPipeline(_emitter, _messageTemplateProcessor, _minimumLevel, null, _levelSwitch, _overrideMap, chain);
+        }
 
+        void Dispatch(ref EventDataBuilder builder)
+        {
+            _enricher.Enrich(ref builder, _messageTemplateProcessor);
+            var data = EventDataBuilder.IntoImmutable(ref builder);
             _emitter.Emit(in data);
         }
     }

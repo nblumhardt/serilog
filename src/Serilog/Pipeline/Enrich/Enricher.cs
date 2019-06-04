@@ -8,7 +8,9 @@ namespace Serilog.Pipeline.Enrich
     // Base class for user-defined enrichers.
     abstract class Enricher : ILogEventEnricher
     {
-        public abstract void Enrich(ref EventDataBuilder eventDataBuilder, ILogEventPropertyValueFactory propertyFactory);
+        public virtual int EstimatedCount { get; } = 1;
+
+        public abstract void Enrich(ref EventDataBuilder eventDataBuilder, ILogEventPropertyValueFactory propertyValueFactory);
 
         // An inefficient default implementation that ensures all P2 enrichers can still be used in code
         // that expects an `ILogEventEnricher`. Heavily-used enrichers will override this method and implement
