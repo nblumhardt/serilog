@@ -1,10 +1,10 @@
 ﻿using System;
+using Serilog.Pipeline.Event;
 
 namespace Serilog.Pipeline.Elements
 {
-    sealed class FilterElement<T, P> : Element<T>
-        where T: struct
-        where P: DataPredicate<T>
+    sealed class FilterElement<P> : Element
+        where P: DataPredicate
     {
         readonly P _condition;
 
@@ -13,7 +13,7 @@ namespace Serilog.Pipeline.Elements
             _condition = condition ?? throw new ArgumentNullException(nameof(condition));
         }
 
-        public override void Propagate(in T data, Emitter<T> next)
+        public override void Propagate(in EventData data, Emitter next)
         {
             if (_condition.IsMatch(data))
                 next.Emit(in data);

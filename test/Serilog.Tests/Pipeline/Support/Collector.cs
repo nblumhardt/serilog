@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
 using Serilog.Pipeline.Elements;
+using Serilog.Pipeline.Event;
 using Xunit;
 
 namespace Serilog.Tests.Pipeline.Support
 {
-    sealed class Collector<T> : Emitter<T> where T : struct
+    sealed class Collector : Emitter
     {
-        public List<T> Items { get; } = new List<T>();
+        public List<CapturedEventData> Items { get; } = new List<CapturedEventData>();
 
-        public T Single => Assert.Single(Items);
+        public CapturedEventData Single => Assert.Single(Items);
 
-        public override void Emit(in T data)
+        public override void Emit(in EventData data)
         {
-            Items.Add(data);
+            Items.Add(data.Capture());
         }
     }
 }

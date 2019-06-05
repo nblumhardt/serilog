@@ -4,12 +4,8 @@ using Serilog.Pipeline.Properties;
 
 namespace Serilog.Pipeline.Event
 {
-    readonly struct EventData
+    readonly ref struct EventData
     {
-#pragma warning disable 414
-        public static readonly EventData Empty = default;
-#pragma warning restore 414
-
         public DateTimeOffset Timestamp { get; }
         public LogEventLevel Level { get; }
         public MessageTemplate MessageTemplate { get; }
@@ -33,6 +29,11 @@ namespace Serilog.Pipeline.Event
                 Exception,
                 MessageTemplate,
                 Properties.ToBuilder(propertiesReservedCapacity));
+        }
+
+        public CapturedEventData Capture()
+        {
+            return new CapturedEventData(in this);
         }
     }
 }

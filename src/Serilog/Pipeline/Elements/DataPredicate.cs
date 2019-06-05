@@ -1,8 +1,9 @@
-﻿namespace Serilog.Pipeline.Elements
+﻿using Serilog.Pipeline.Event;
+
+namespace Serilog.Pipeline.Elements
 {
-    abstract class DataPredicate<T>
-        where T: struct
+    abstract class DataPredicate
     {
-        public abstract bool IsMatch(in T data);
+        public abstract bool IsMatch(in EventData data);
     }
 }

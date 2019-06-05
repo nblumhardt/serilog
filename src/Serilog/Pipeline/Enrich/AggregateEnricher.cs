@@ -6,7 +6,7 @@ using Serilog.Pipeline.Event;
 
 namespace Serilog.Pipeline.Enrich
 {
-    sealed class AggregateEnricher : Element<EventData>
+    sealed class AggregateEnricher : Element
     {
         readonly ILogEventPropertyValueFactory _propertyValueFactory;
         readonly Enricher[] _enrichers;
@@ -17,7 +17,7 @@ namespace Serilog.Pipeline.Enrich
             _enrichers = enrichers?.ToArray() ?? throw new ArgumentNullException(nameof(enrichers));
         }
 
-        public override void Propagate(in EventData eventData, Emitter<EventData> next)
+        public override void Propagate(in EventData eventData, Emitter next)
         {
             // Assume each enricher will, on average, add a property; plus two for good measure...
 

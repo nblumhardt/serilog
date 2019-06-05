@@ -12,7 +12,7 @@ namespace Serilog.Pipeline.Logger
     // This is temporary
     class LogPipeline
     {
-        readonly Emitter<EventData> _emitter;
+        readonly Emitter _emitter;
         readonly Enricher _enricher;
         readonly MessageTemplateProcessor _messageTemplateProcessor;
         readonly LogEventLevel _minimumLevel;
@@ -21,7 +21,7 @@ namespace Serilog.Pipeline.Logger
         readonly LevelOverrideMap _overrideMap;
 
         public LogPipeline(
-            Emitter<EventData> emitter,
+            Emitter emitter,
             MessageTemplateProcessor messageTemplateProcessor,
             LogEventLevel minimumLevel,
             Action dispose = null,

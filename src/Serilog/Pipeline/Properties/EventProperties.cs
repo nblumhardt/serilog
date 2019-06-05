@@ -8,16 +8,16 @@ namespace Serilog.Pipeline.Properties
     // and copying is frequent.
     // TODO, make methods inlinable by extracting throw statements; check _elements for null and fail gracefully.
 
-    readonly struct EventProperties
+    readonly ref struct EventProperties
     {
         readonly EventProperty[] _elements;
 
         // TODO - make this "safe"/copying, and move the non-copying behavior to FromElements
         public EventProperties(EventProperty[] elements, int count)
         {
-            if (elements == null) throw new ArgumentNullException(nameof(elements));
-            if (elements.Length < count) throw new ArgumentOutOfRangeException(nameof(elements), "Too few elements provided.");
-            if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count), "Count must be non-negative.");
+            if (elements == null) Throw.NewArgumentNullException(nameof(elements));
+            if (elements.Length < count) Throw.NewArgumentOutOfRangeException(nameof(elements), "Too few elements provided.");
+            if (count <= 0) Throw.NewArgumentOutOfRangeException(nameof(count), "Count must be non-negative.");
             if (count != elements.Length)
                 Array.Resize(ref elements, count);
             _elements = elements;
@@ -27,7 +27,7 @@ namespace Serilog.Pipeline.Properties
 
         public bool Contains(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null) Throw.NewArgumentNullException(nameof(name));
 
             for (var i = 0; i < _elements.Length; ++i)
             {
@@ -40,7 +40,7 @@ namespace Serilog.Pipeline.Properties
 
         public bool TryGetValue(string name, out LogEventPropertyValue value)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null) Throw.NewArgumentNullException(nameof(name));
 
             for (var i = 0; i < _elements.Length; ++i)
             {

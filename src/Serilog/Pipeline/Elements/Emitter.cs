@@ -1,8 +1,9 @@
-﻿namespace Serilog.Pipeline.Elements
+﻿using Serilog.Pipeline.Event;
+
+namespace Serilog.Pipeline.Elements
 {
-    abstract class Emitter<T>
-        where T: struct
+    abstract class Emitter
     {
-        public abstract void Emit(in T data);
+        public abstract void Emit(in EventData data);
     }
 }

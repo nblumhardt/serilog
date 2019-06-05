@@ -8,7 +8,7 @@ using Serilog.Pipeline.Event;
 namespace Serilog.Pipeline.Write
 {
     // Base class for user-defined sinks.
-    abstract class Sink : Emitter<EventData>, ILogEventSink
+    abstract class Sink : Emitter, ILogEventSink
     {
         // An inefficient default implementation that ensures all P2 sinks can still be used in code
         // that expects an `ILogEventSink`. Heavily-used enrichers will override this method and implement

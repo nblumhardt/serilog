@@ -6,7 +6,7 @@ using Serilog.Pipeline.Event;
 
 namespace Serilog.Pipeline.Filters
 {
-    abstract class Filter : DataPredicate<EventData>, ILogEventFilter
+    abstract class Filter : DataPredicate, ILogEventFilter
     {
         public virtual bool IsEnabled(LogEvent logEvent)
         {

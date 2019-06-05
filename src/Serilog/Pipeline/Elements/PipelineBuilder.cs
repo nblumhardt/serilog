@@ -3,36 +3,35 @@ using System.Collections.Generic;
 
 namespace Serilog.Pipeline.Elements
 {
-    class PipelineBuilder<T>
-        where T: struct
+    class PipelineBuilder
     {
-        readonly List<Element<T>> _elements = new List<Element<T>>();
+        readonly List<Element> _elements = new List<Element>();
 
-        public static Link<T, TElement> Link<TElement>(TElement head, Emitter<T> next)
-            where TElement: Element<T>
+        public static Link<TElement> Link<TElement>(TElement head, Emitter next)
+            where TElement: Element
         {
             if (head == null) throw new ArgumentNullException(nameof(head));
             if (next == null) throw new ArgumentNullException(nameof(next));
-            return new Link<T, TElement>(head, next);
+            return new Link<TElement>(head, next);
         }
 
-        public PipelineBuilder<T> Add(Element<T> element)
+        public PipelineBuilder Add(Element element)
         {
             if (element == null) throw new ArgumentNullException(nameof(element));
             _elements.Add(element);
             return this;
         }
 
-        public PipelineBuilder<T> Tap<TEmitter>(TEmitter tap)
-            where TEmitter : Emitter<T>
+        public PipelineBuilder Tap<TEmitter>(TEmitter tap)
+            where TEmitter : Emitter
         {
             if (tap == null) throw new ArgumentNullException(nameof(tap));
-            return Add(new TapElement<T, TEmitter>(tap));
+            return Add(new TapElement<TEmitter>(tap));
         }
 
-        public Emitter<T> Build()
+        public Emitter Build()
         {
-            Emitter<T> head = new Terminator<T>();
+            Emitter head = new Terminator();
             for (var i = _elements.Count - 1; i >= 0; --i)
                 head = Link(_elements[i], head);
 

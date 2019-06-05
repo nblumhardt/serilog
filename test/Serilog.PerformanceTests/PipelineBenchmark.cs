@@ -21,7 +21,6 @@ using Serilog.Core.Enrichers;
 using Serilog.Events;
 using Serilog.PerformanceTests.Support;
 using Serilog.Pipeline.Elements;
-using Serilog.Pipeline.Event;
 using Serilog.Pipeline.Logger;
 
 namespace Serilog.PerformanceTests
@@ -46,9 +45,11 @@ namespace Serilog.PerformanceTests
             _log = new LoggerConfiguration()
                 .WriteTo.Sink(new NullSink())
                 .CreateLogger();
-            _logEnriched = _log.ForContext<PipelineBenchmark>();
+            _logEnriched = _log
+                .ForContext<PipelineBenchmark>()
+                .ForContext("Other", "Test");
 
-            var emitter = new PipelineBuilder<EventData>()
+            var emitter = new PipelineBuilder()
                 .Tap(new NullSink())
                 .Build();
 
@@ -67,7 +68,9 @@ namespace Serilog.PerformanceTests
                 processor,
                 LogEventLevel.Information);
 
-            _pipelineEnriched = _pipeline.ForContext(new FixedPropertyEnricher(new EventProperty("SourceContext", new ScalarValue(typeof(PipelineBenchmark).FullName))));
+            _pipelineEnriched = _pipeline
+                .ForContext(new FixedPropertyEnricher(new EventProperty("SourceContext", new ScalarValue(typeof(PipelineBenchmark).FullName))))
+                .ForContext(new FixedPropertyEnricher(new EventProperty("Other", new ScalarValue("Test"))));
         }
 
         [Benchmark(Baseline = true)]

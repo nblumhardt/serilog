@@ -1,10 +1,10 @@
 ﻿using System;
+using Serilog.Pipeline.Event;
 
 namespace Serilog.Pipeline.Elements
 {
-    sealed class TapElement<T, TEmitter> : Element<T>
-        where T : struct
-        where TEmitter : Emitter<T>
+    sealed class TapElement<TEmitter> : Element
+        where TEmitter : Emitter
     {
         readonly TEmitter _emitter;
 
@@ -13,7 +13,7 @@ namespace Serilog.Pipeline.Elements
             _emitter = emitter ?? throw new ArgumentNullException(nameof(emitter));
         }
         
-        public override void Propagate(in T data, Emitter<T> next)
+        public override void Propagate(in EventData data, Emitter next)
         {
             // Generic TEmitter means this should be a direct (non-virtual) call if TEmitter is sealed.
             _emitter.Emit(in data);

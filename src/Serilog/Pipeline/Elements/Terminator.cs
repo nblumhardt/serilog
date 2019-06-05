@@ -1,9 +1,10 @@
-﻿namespace Serilog.Pipeline.Elements
+﻿using Serilog.Pipeline.Event;
+
+namespace Serilog.Pipeline.Elements
 {
-    sealed class Terminator<T> : Emitter<T>
-        where T: struct
+    sealed class Terminator : Emitter
     {
-        public override void Emit(in T data)
+        public override void Emit(in EventData data)
         {
         }
     }

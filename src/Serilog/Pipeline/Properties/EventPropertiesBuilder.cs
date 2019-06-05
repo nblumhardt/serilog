@@ -16,15 +16,15 @@ namespace Serilog.Pipeline.Properties
 
         public EventPropertiesBuilder(int capacity)
         {
-            if (capacity < 0) throw new ArgumentOutOfRangeException(nameof(capacity), "Capacity must be non-negative.");
+            if (capacity < 0) Throw.NewArgumentOutOfRangeException(nameof(capacity), "Capacity must be non-negative.");
             _elements = new EventProperty[capacity];
             _count = 0;
         }
 
         public EventPropertiesBuilder(EventProperty[] initial, int reservedCapacity)
         {
-            if (initial == null) throw new ArgumentNullException(nameof(initial));
-            if (reservedCapacity < 0) throw new ArgumentOutOfRangeException(nameof(reservedCapacity), "Reserved capacity must be non-negative.");
+            if (initial == null) Throw.NewArgumentNullException(nameof(initial));
+            if (reservedCapacity < 0) Throw.NewArgumentOutOfRangeException(nameof(reservedCapacity), "Reserved capacity must be non-negative.");
 
             if (reservedCapacity == 0)
             {
@@ -57,7 +57,7 @@ namespace Serilog.Pipeline.Properties
 
         public bool Contains(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null) Throw.NewArgumentNullException(nameof(name));
 
             for (var i = 0; i < _count; ++i)
             {
@@ -70,7 +70,7 @@ namespace Serilog.Pipeline.Properties
 
         public bool TryGetValue(string name, out LogEventPropertyValue value)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null) Throw.NewArgumentNullException(nameof(name));
 
             for (var i = 0; i < _count; ++i)
             {
@@ -103,7 +103,7 @@ namespace Serilog.Pipeline.Properties
 
         public bool TryAdd(in EventProperty property)
         {
-            if (property.Equals(EventProperty.None)) throw new ArgumentNullException(nameof(property));
+            if (property.Equals(EventProperty.None)) Throw.NewArgumentNullException(nameof(property));
 
             for (var i = 0; i < _count; ++i)
             {
@@ -121,8 +121,8 @@ namespace Serilog.Pipeline.Properties
 
         public bool TryAdd(string name, LogEventPropertyValue value)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            if (value == null) throw new ArgumentNullException(nameof(value));
+            if (name == null) Throw.NewArgumentNullException(nameof(name));
+            if (value == null) Throw.NewArgumentNullException(nameof(value));
 
             for (var i = 0; i < _count; ++i)
             {
@@ -152,7 +152,7 @@ namespace Serilog.Pipeline.Properties
 
         public void AddOrUpdate(in EventProperty property)
         {
-            if (property.Equals(EventProperty.None)) throw new ArgumentNullException(nameof(property));
+            if (property.Equals(EventProperty.None)) Throw.NewArgumentNullException(nameof(property));
 
             for (var i = 0; i < _count; ++i)
             {
@@ -180,7 +180,7 @@ namespace Serilog.Pipeline.Properties
 
         public bool Remove(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null) Throw.NewArgumentNullException(nameof(name));
 
             for (var i = 0; i < _count; ++i)
             {
@@ -219,7 +219,8 @@ namespace Serilog.Pipeline.Properties
                 return new EventPropertiesBuilder(elements, reservedCapacity);
 
             var ret = default(EventPropertiesBuilder);
-            ret._elements = elements ?? throw new ArgumentNullException(nameof(elements));
+            if (elements == null) Throw.NewArgumentNullException(nameof(elements));
+            ret._elements = elements;
             ret._count = elements.Length;
             return ret;
         }
